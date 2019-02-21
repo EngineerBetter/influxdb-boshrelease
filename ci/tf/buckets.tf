@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "ci" {
-  bucket        = "influxdb-ci"
+  bucket        = "eb-influxdb-ci"
   acl           = "private"
   force_destroy = true
 
@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "ci" {
 }
 
 resource "aws_s3_bucket" "blobstore" {
-  bucket        = "influxdb-blobstore"
+  bucket        = "eb-influxdb-blobstore"
   acl           = "public-read"
   force_destroy = true
 
@@ -26,7 +26,7 @@ resource "aws_s3_bucket_policy" "blob-public-read" {
   "Statement": [{
     "Action": [ "s3:GetObject" ],
     "Effect": "Allow",
-    "Resource": "arn:aws:s3:::influxdb-blobstore/*",
+    "Resource": "arn:aws:s3:::eb-influxdb-blobstore/*",
     "Principal": { "AWS": ["*"] }
   }]
 }
@@ -34,7 +34,7 @@ POLICY
 }
 
 resource "aws_s3_bucket" "releases" {
-  bucket        = "influxdb-releases"
+  bucket        = "eb-influxdb-releases"
   acl           = "public-read"
   force_destroy = true
 

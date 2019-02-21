@@ -12,7 +12,7 @@ resources:
   source:
     uri: git@github.com:EngineerBetter/influxdb-boshrelease.git
     branch: master
-    private_key: ((github_deployment_key))
+    private_key: ((github_private_key))
     ignore_paths:
     - .final_builds/
     - releases/
@@ -22,14 +22,14 @@ resources:
   source:
     uri: git@github.com:EngineerBetter/influxdb-boshrelease.git
     branch: master
-    private_key: ((github_deployment_key))
+    private_key: ((github_private_key))
 
 - name: version
   type: semver
   source:
     key: version
     << : &candidate-s3-creds
-      bucket: influxdb-releases
+      bucket: eb-influxdb-releases
       access_key_id: ((concourse_ci_s3_access_key))
       secret_access_key: ((concourse_ci_s3_secret_key))
       region_name: eu-central-1
@@ -48,7 +48,7 @@ resources:
   source:
     terraform_source: influxdb-release/ci/tf/
     storage:
-      bucket: influxdb-ci
+      bucket: eb-influxdb-ci
       bucket_path: /terraform/
       access_key_id: ((concourse_ci_s3_access_key))
       secret_access_key: ((concourse_ci_s3_secret_key))
