@@ -40,16 +40,6 @@ EOF
 
   bosh finalize-release --version $VERSION $FINAL_RELEASE_PATH
 
-  bosh int \
-    manifests/bosh-lite/runtime-config.yml \
-    -o ci/tasks/update-runtime-config-version.yml \
-    -v version=$VERSION \
-    > manifests/bosh-lite/new-runtime-config.yml
-
-  # Can't redirect to file being read
-  mv manifests/bosh-lite/new-runtime-config.yml \
-     manifests/bosh-lite/runtime-config.yml
-
   git add -A
   git status
 
