@@ -1,0 +1,135 @@
+---
+resource_types:
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: "0.11.10"
+
+resources:
+- name: influxdb-release
+  type: git
+  source:
+    uri: git@github.com:EngineerBetter/influxdb-boshrelease.git
+    branch: master
+    private_key: ((github_deployment_key))
+    ignore_paths:
+    - .final_builds/
+    - releases/
+    - manifests/
+- name: influxdb-release-push
+  type: git
+  source:
+    uri: git@github.com:EngineerBetter/influxdb-boshrelease.git
+    branch: master
+    private_key: ((github_deployment_key))
+
+- name: version
+  type: semver
+  source:
+    key: version
+    << : &candidate-s3-creds
+      bucket: influxdb-releases
+      access_key_id: ((concourse_ci_s3_access_key))
+      secret_access_key: ((concourse_ci_s3_secret_key))
+      region_name: eu-central-1
+- name: candidate-release
+  type: s3
+  source:
+    versioned_file: "influxdb-dev-release.tgz"
+    << : *candidate-s3-creds
+- name: final-release
+  type: s3
+  source:
+    regexp: "influxdb-final-release-(.*).tgz"
+    << : *candidate-s3-creds
+- name: ci-tf
+  type: terraform
+  source:
+    terraform_source: influxdb-release/ci/tf/
+    storage:
+      bucket: influxdb-ci
+      bucket_path: /terraform/
+      access_key_id: ((concourse_ci_s3_access_key))
+      secret_access_key: ((concourse_ci_s3_secret_key))
+      region_name: eu-central-1
+      server_side_encryption: AES256
+    env:
+      AWS_ACCESS_KEY_ID: ((concourse_ci_s3_access_key))
+      AWS_SECRET_ACCESS_KEY: ((concourse_ci_s3_secret_key))
+      AWS_DEFAULT_REGION: eu-central-1
+
+jobs:
+- name: create-buckets
+  serial: true
+  plan:
+  - get: influxdb-release
+    trigger: true
+  - put: ci-tf
+    params:
+      env_name: whevs
+
+- name: create-release
+  plan:
+    - get: influxdb-release
+      trigger: true
+      passed: [create-buckets]
+    - task: create
+      file: influxdb-release/ci/tasks/create-candidate.yml
+    - put: candidate-release
+      params:
+        file: "release/influxdb-dev-release.tgz"
+        acl: public-read
+
+- name: create-final-release
+  serial_groups:
+    - version
+  plan:
+    - aggregate:
+      - get: influxdb-release
+        passed: [create-release]
+        trigger: true
+      - get: version
+    - task: create-final-release
+      file: influxdb-release/ci/tasks/create-final.yml
+      params:
+        BLOBSTORE_ACCESS_KEY_ID: ((concourse_ci_s3_access_key))
+        BLOBSTORE_SECRET_ACCESS_KEY: ((concourse_ci_s3_secret_key))
+    - put: final-release
+      params:
+        file: final-release/influxdb-final-release-*.tgz
+        acl: public-read
+
+- name: finalize-release
+  serial_groups:
+    - version
+  plan:
+    - aggregate:
+      - get: influxdb-release
+        passed: [create-final-release]
+        trigger: true
+      - get: final-release
+        passed: [create-final-release]
+        trigger: true
+      - get: version
+        passed: [create-final-release]
+    - task: finalize-release
+      file: influxdb-release/ci/tasks/finalize-release.yml
+      params:
+        BLOBSTORE_ACCESS_KEY_ID: ((concourse_ci_s3_access_key))
+        BLOBSTORE_SECRET_ACCESS_KEY: ((concourse_ci_s3_secret_key))
+    - put: influxdb-release-push
+      params:
+        rebase: true
+        repository: final-influxdb-release
+    - put: version
+      params:
+        bump: patch
+
+- name: bump-minor
+  serial_groups:
+    - version
+  plan:
+    - put: version
+      params:
+        bump: minor

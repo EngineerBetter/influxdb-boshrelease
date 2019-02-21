@@ -1,0 +1,4 @@
+---
+- type: replace
+  path: /releases/name=influxdb/version
+  value: ((version))

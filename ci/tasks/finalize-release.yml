@@ -1,0 +1,24 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: engineerbetter/pcf-ops
+    tag: latest
+
+inputs:
+  - name: influxdb-release
+  - name: final-release
+  - name: version
+
+outputs:
+  - name: bumped-version
+  - name: final-influxdb-release
+
+params:
+  BLOBSTORE_ACCESS_KEY_ID: replace-me
+  BLOBSTORE_SECRET_ACCESS_KEY: replace-me
+
+run:
+  path: influxdb-release/ci/tasks/finalize-release.sh
