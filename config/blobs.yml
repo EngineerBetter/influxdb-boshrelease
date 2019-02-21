@@ -1,6 +1,8 @@
 golang/golang-linux-amd64-1.11.tar.gz:
   size: 140132627
+  object_id: b3d2754a-8f70-4b10-7ea2-d11fdb90fb23
   sha: b951c39500c4c85f57b7549ebc87281816d28f59
 influxdb_1.3/influxdb-1.3.5-static_linux_amd64.tar.gz:
   size: 13820045
+  object_id: ce0b3e86-6392-4ceb-6428-bda3b503d716
   sha: a61b6f2c93a49ad5509b34f07efb4252ac85a73c
