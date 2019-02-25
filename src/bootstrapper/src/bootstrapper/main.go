@@ -41,7 +41,7 @@ func main() {
 		panic(fmt.Sprintf("Error creating DB '%s': %s", *databaseName, err))
 	}
 
-	retentionCommand := fmt.Sprintf("create RETENTION POLICY \"default\" ON %s DURATION %s REPLICATION %s DEFAULT", *databaseName, *retention, *replication)
+	retentionCommand := fmt.Sprintf("create RETENTION POLICY \"%s\" ON %s DURATION %s REPLICATION %s DEFAULT", *databaseName, *databaseName, *retention, *replication)
 	_, err = dbClient.Query(client.Query{Command: retentionCommand})
 	if err != nil {
 		panic(fmt.Sprintf("Error creating default retention policy: %s", err))
