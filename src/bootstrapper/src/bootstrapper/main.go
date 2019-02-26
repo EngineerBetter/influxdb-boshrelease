@@ -14,7 +14,7 @@ func main() {
 	influxUser := flag.String("user", "root", "influx user")
 	influxPassword := flag.String("password", "root", "influx user's password")
 	databaseName := flag.String("database", "", "Database name to create")
-	retention := flag.String("retention", "14d", "Retention duration")
+	retention := flag.String("retention", "Retention duration")
 	replication := flag.String("replication", "1", "Replication count")
 	flag.Parse()
 
