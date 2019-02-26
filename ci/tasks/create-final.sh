@@ -19,4 +19,5 @@ EOF
 
 bosh create-release \
   --final \
+  --version $VERSION \
   "--tarball=../final-release/influxdb-final-release-${VERSION}.tgz"
