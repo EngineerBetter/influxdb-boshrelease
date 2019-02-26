@@ -42,6 +42,7 @@ resources:
 - name: final-release
   type: s3
   source:
+    initial_path: "influxdb-final-release-0.0.0.tgz"
     regexp: "influxdb-final-release-(.*).tgz"
     << : *candidate-s3-creds
 - name: ci-tf
