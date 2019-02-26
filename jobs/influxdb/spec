@@ -27,7 +27,7 @@ properties:
     default: "root"
     description: "influx user's password"
   influxdb.retention:
-    default: "14d"
+    default: "28d"
     description: "default retention period for database"
   influxdb.replication:
     default: "1"
