@@ -62,10 +62,18 @@ resources:
       AWS_DEFAULT_REGION: eu-central-1
 
 jobs:
+- name: set-pipeline
+  serial: true
+  plan:
+  - get: influxdb-release
+    trigger: true
+  - set_pipeline: self
+    file: influxdb-release/ci/pipeline.yml
 - name: create-buckets
   serial: true
   plan:
   - get: influxdb-release
+    passed: [set-pipeline]
     trigger: true
   - put: ci-tf
     params:
@@ -87,7 +95,7 @@ jobs:
   serial_groups:
     - version
   plan:
-    - aggregate:
+    - in_parallel:
       - get: influxdb-release
         passed: [create-release]
         trigger: true
@@ -106,7 +114,7 @@ jobs:
   serial_groups:
     - version
   plan:
-    - aggregate:
+    - in_parallel:
       - get: influxdb-release
         passed: [create-final-release]
         trigger: true
